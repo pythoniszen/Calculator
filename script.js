@@ -3,20 +3,42 @@ let lastOperation = null;
 let lastNumber = null;
 
 function append(num) {
+  // If the display reads 'Error', clear it first
+  if (display.value === 'Error') {
+    display.value = '';
+    lastOperation = null;
+    lastNumber = null;
+  }
+
   if (typeof num === 'number' || !isNaN(num)) {
     display.value += num;
   } else {
     if (['+', '-', '*', '/'].includes(display.value[display.value.length - 1])) {
-      display.value = display.value.slice(0, -1) + num;
-      lastOperation = num;
+        display.value = display.value.slice(0, -1) + num;
+        lastOperation = num;
     } else {
-      if (lastOperation) {
-        calculate();
-      }
-      lastOperation = num;
-      lastNumber = parseFloat(display.value);
-      display.value += num;
+        if (lastOperation) {
+            calculate();
+        }
+
+        // Check here if the result of the calculation was 'Error'
+        if (display.value === 'Error') {
+            lastOperation = null;
+            lastNumber = null;
+            return; // Exit function without appending operator.
+        }
+
+        lastOperation = num;
+        lastNumber = parseFloat(display.value);
+        display.value += num;
     }
+  }
+
+}
+
+function removeOperatorIfAny() {
+  if (['+', '-', '*', '/'].includes(display.value[display.value.length - 1])) {
+    display.value = display.value.slice(0, -1);
   }
 }
 
@@ -52,12 +74,27 @@ function calculate() {
           result = lastNumber / currentNumber;
         } else {
           display.value = 'Error';
+          removeOperatorIfAny(); // Remove operator after "Error" is detected
+          lastOperation = null;
+          lastNumber = null;
           return;
         }
         break;
       default:
         display.value = 'Error';
+        removeOperatorIfAny(); // Remove operator after "Error" is detected
+        lastOperation = null;
+        lastNumber = null;
         return;
+    }
+
+    // Check for valid result (not infinity or NaN)
+    if (!isFinite(result) || isNaN(result)) {
+      display.value = 'Error';
+      removeOperatorIfAny(); // Remove operator after "Error" is detected
+      lastOperation = null;
+      lastNumber = null;
+      return;
     }
 
     display.value = result;
@@ -65,3 +102,9 @@ function calculate() {
   }
 }
 
+// Prevent user input when 'Error' is displayed
+display.addEventListener('keydown', function (event) {
+  if (display.value === 'Error') {
+    event.preventDefault();
+  }
+});
