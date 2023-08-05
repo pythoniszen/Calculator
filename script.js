@@ -2,9 +2,45 @@ let display = document.getElementById('display');
 let lastOperation = null;
 let lastNumber = null;
 
+// Initialize the display to '0'
+display.value = '0';
+
 function append(num) {
-  // If the display reads 'Error', clear it first
-  if (display.value === 'Error') {
+  // Handle the specific '0' case first
+  if (display.value === '0' && !isNaN(num)) {
+    if (num !== '0') {
+      display.value = num.toString(); // Replace initial '0' with the new number
+      return;
+    } else {
+      return; // If '0' is pressed when display is '0', just return
+    }
+  }
+
+  // Handle '0' after an operator
+  if (['+', '-', '*', '/'].includes(display.value[display.value.length - 1]) && !isNaN(num)) {
+    if (num === '0') {
+      display.value += '0'; // Allow a single '0' after an operator
+      return;
+    } else {
+      display.value += num; // If any number other than '0' is pressed, append that number after operator
+      return;
+    }
+  }
+
+  // Replace '0' after an operator with a new number
+  if (!isNaN(display.value[display.value.length - 1]) && 
+      display.value[display.value.length - 2] && 
+      ['+', '-', '*', '/'].includes(display.value[display.value.length - 2]) && 
+      display.value[display.value.length - 1] === '0' && 
+      !isNaN(num)) {
+    display.value = display.value.slice(0, -1) + num;
+    return;
+  }
+
+  // Handle 'Error' and general operations
+  if (display.value === 'Error' && isNaN(num)) {
+    return;
+  } else if (display.value === 'Error') {
     display.value = '';
     lastOperation = null;
     lastNumber = null;
@@ -14,36 +50,24 @@ function append(num) {
     display.value += num;
   } else {
     if (['+', '-', '*', '/'].includes(display.value[display.value.length - 1])) {
-        display.value = display.value.slice(0, -1) + num;
-        lastOperation = num;
+      display.value = display.value.slice(0, -1) + num;
+      lastOperation = num;
     } else {
-        if (lastOperation) {
-            calculate();
-        }
+      if (lastOperation) {
+        calculate();
+      }
 
-        // Check here if the result of the calculation was 'Error'
-        if (display.value === 'Error') {
-            lastOperation = null;
-            lastNumber = null;
-            return; // Exit function without appending operator.
-        }
-
+      if (display.value !== 'Error') {
         lastOperation = num;
         lastNumber = parseFloat(display.value);
         display.value += num;
+      }
     }
-  }
-
-}
-
-function removeOperatorIfAny() {
-  if (['+', '-', '*', '/'].includes(display.value[display.value.length - 1])) {
-    display.value = display.value.slice(0, -1);
   }
 }
 
 function clearDisplay() {
-  display.value = '';
+  display.value = '0';
   lastOperation = null;
   lastNumber = null;
 }
@@ -74,7 +98,6 @@ function calculate() {
           result = lastNumber / currentNumber;
         } else {
           display.value = 'Error';
-          removeOperatorIfAny(); // Remove operator after "Error" is detected
           lastOperation = null;
           lastNumber = null;
           return;
@@ -82,16 +105,13 @@ function calculate() {
         break;
       default:
         display.value = 'Error';
-        removeOperatorIfAny(); // Remove operator after "Error" is detected
         lastOperation = null;
         lastNumber = null;
         return;
     }
 
-    // Check for valid result (not infinity or NaN)
     if (!isFinite(result) || isNaN(result)) {
       display.value = 'Error';
-      removeOperatorIfAny(); // Remove operator after "Error" is detected
       lastOperation = null;
       lastNumber = null;
       return;
@@ -103,7 +123,7 @@ function calculate() {
 }
 
 // Prevent user input when 'Error' is displayed
-display.addEventListener('keydown', function (event) {
+display.addEventListener('keydown', function(event) {
   if (display.value === 'Error') {
     event.preventDefault();
   }
