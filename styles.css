@@ -20,11 +20,7 @@ body {
   box-shadow: none;
 }
 
-.status {
-  margin-bottom: 12.5px;
-}
-
-.calcContainer {
+.calc-container {
   border: 1px solid #ffffff;
   display: flex;
   justify-content: center;
@@ -46,16 +42,15 @@ body {
   padding-right: 12.5px;
 }
 
-#buttonsContainer {
+#buttons-container {
   margin-left: 1.875px;
 }
 
-#linkContainer {
+#link-container {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 5px;
-  margin-left: px;
 }
 
 img {
@@ -63,7 +58,7 @@ img {
   height: 25px;
 }
 
-#nameText {
+#name-text {
   font-size: 20px;
   color: #000000;
   margin-right: 50px;
